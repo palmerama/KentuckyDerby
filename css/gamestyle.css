@@ -1,0 +1,8 @@
+html, body {
+	margin:0; padding:0;
+  background:#000000;
+}
+
+#gameStageCanvas {
+	background-color: #666;
+}
