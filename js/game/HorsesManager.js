@@ -3,7 +3,8 @@
     var namespace = GAMEMAIN.namespace('GAMEMAIN.game');
 
     var stage;
-
+    var preload;
+    var container;
 
 
     if (namespace.HorsesManager === undefined) 
@@ -16,8 +17,13 @@
         var p = namespace.HorsesManager.prototype;
 		
 		
-		p.init = function()
+		p.init = function(aPreload)
 		{
+			preload = aPreload;
+
+			container = new createjs.Container();
+			stage.addChild(container);
+
 			this.createHorse(1);
 			this.createHorse(2);
 			this.createHorse(3);
@@ -27,7 +33,7 @@
 
 		p.createHorse = function(id)
 		{
-			this['horse'+id] = new namespace.Horse(gameStage);
+			this['horse'+id] = new namespace.Horse(container, preload);
 			this['horse'+id].init(id);
 		}
 }

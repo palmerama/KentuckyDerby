@@ -2,17 +2,20 @@
 
     var namespace = GAMEMAIN.namespace('GAMEMAIN.game');
 
-    var stage;
+    var container;
     var horse;
     var moveDuration;
     var moveDistance;
 
+    var preload;
+
 
     if (namespace.Horse === undefined) 
 	{
-        namespace.Horse = function(aStage)
+        namespace.Horse = function(aContainer, aPreload)
  		{	
-			stage = aStage;
+			container = aContainer;
+			preload = aPreload;
 			moveDuration = 2;
 			moveDistance = 40;
         }
@@ -22,13 +25,17 @@
 		
 		p.init = function(id)
 		{
-			this.horse = new createjs.Bitmap('img/horsetest1.png');
+			this.horse = new createjs.Bitmap(preload.getAsset('horse'+id));
 			this.horse.regX = 50;
 			this.horse.regY = 82;
 			this.horse.x = 60;
 			this.horse.y = 122+(41*(id-1));
 
-			stage.addChild(this.horse);
+			container.addChild(this.horse);
+
+			var grass = new createjs.Bitmap(preload.getAsset('grass'+id));
+			grass.y = this.horse.y - 21;
+			container.addChild(grass);
 		}
 
 		p.moveForward = function()

@@ -2,119 +2,158 @@
 
     var namespace = GAMEMAIN.namespace('GAMEMAIN.game');
 
-    var stage;
+    var container;
     var horsesManager;
+    var preload;
 
 
     if (namespace.Pit === undefined) 
 	{
-        namespace.Pit = function(aStage, aHorsesManager)
+        namespace.Pit = function(aContainer, aHorsesManager, aPreload)
  		{	
-			stage = aStage;
+			container = aContainer;
+			preload = aPreload;
 			horsesManager = aHorsesManager;
         }
 
         var p = namespace.Pit.prototype;
 		
 		
-		p.init = function(id, holeMaskPos, ballXPos, doorProps, lanes)
+		p.init = function(id, ballXPos, doorProps, auto)
 		{
 			this.id = id;
 			this.horse = horsesManager['horse'+id];
-			this.holeMaskPos = holeMaskPos;
 			this.ballX = ballXPos;
 			this.doorProps = doorProps;
-			this.lanes = lanes;
+			this.auto = auto;
 
-			this.createMasks();
-			this.createDoors();
 			this.createBall();
+			this.createDoors();			
 		}
 
 		p.createBall = function()
 		{
-			this.ball = new createjs.Bitmap('img/ball.png');
+			var json = {
+				'frames': [[115, 2, 51, 52, 0, 0, 0], [2, 59, 51, 51, 0, 0, 0], [170, 2, 53, 52, 0, 0, 0], [2, 2, 52, 53, 0, 0, 0], [58, 2, 53, 52, 0, 0, 0]], 
+				'animations': {'all': {'frames': [0, 1, 2, 3, 4, 1, 3, 4, 0, 2]}}, 
+				'images': [preload.getAsset('snowball1')]
+			}
+
+			var spriteSheet = new createjs.SpriteSheet(json);
+ 			this.ball = new createjs.BitmapAnimation(spriteSheet);
+ 			this.ball.gotoAndStop(1);
+
 			this.ball.regX = 22;
 			this.ball.regY = 37;
 			this.ball.x = -1000;
 			this.ball.y = -1000;
-			stage.addChild(this.ball);
-		}
-
-		p.createMasks = function()
-		{
-			this.holeMask = new createjs.Bitmap('img/pit' + this.id + 'mask.png');
-			this.holeMask.x = this.holeMaskPos.x;
-			this.holeMask.y = this.holeMaskPos.y;
-			stage.addChild(this.holeMask);
+			container.addChild(this.ball);
 		}
 
 		p.createDoors = function()
 		{
-			this.leftDoor = new createjs.Bitmap('img/pitdoor.png');
+			this.leftDoor = new createjs.Bitmap(preload.getAsset('pitDoor'));
 			this.leftDoor.skewX = this.doorProps.skew;
 			this.leftDoor.x = this.doorProps.x - this.leftDoor.image.width;
-			this.leftDoor.y = 347 - this.leftDoor.image.height/2;
-			stage.addChildAt(this.leftDoor, stage.getChildIndex(this.lanes));
+			this.leftDoor.y = 340 - this.leftDoor.image.height/2;
+			container.addChildAt(this.leftDoor, 2);
 
 			this.rightDoor = this.leftDoor.clone();
 			this.rightDoor.skewX = this.doorProps.skew;
 			this.rightDoor.x = this.doorProps.x;
-			this.rightDoor.y = 347 - this.rightDoor.image.height/2;
-			stage.addChildAt(this.rightDoor, stage.getChildIndex(this.lanes));
+			this.rightDoor.y = 340 - this.rightDoor.image.height/2;
+			container.addChildAt(this.rightDoor, 2);
 
 			this.doorsOpen = false;
 		}
 
 		p.startBall = function()
 		{
-			stage.addChild(this.ball);
+			container.addChild(this.ball);
+			this.ball.gotoAndPlay(Math.floor(1+Math.random()*this.ball.getNumFrames-1));
 			this.ball.x = this.ballX.startX;
 			this.ball.y = 550;
+			this.ball.buttonMode = true;
 			this.ball.scaleX = this.ball.scaleY = 1.3;
-			TweenLite.to(this.ball, .4, {delay:1, y:472, scaleX:1, scaleY:1, ease:Quad.easeOut, onComplete:this.addPressListenerToBall.bind(this)});
+
+			var props = {y:472, scaleX:1, scaleY:1, ease:Quad.easeOut};
+			this.auto ? props.onComplete = this.autoHesitate.bind(this) : props.onComplete = this.addPressListenerToBall.bind(this);
+			TweenLite.to(this.ball, .4, props);
 		}
 
 		p.addPressListenerToBall = function()
 		{
+			this.ball.stop();
 			this.ball.onPress = this.onPressBall.bind(this);
 		}
 
 		p.onPressBall = function(evt)
 		{
 			evt.target.onPress = null;
-			this.ballTween = TweenLite.to(evt.target, .45, {x:this.ballX.endX, y:328, scaleX:.75, scaleY:.75, ease:Sine.easeIn, 
-				onUpdate:this.onBallUpdate.bind(this), onComplete:this.potBall.bind(this)});
+			this.fireBall();
+		}
+
+		p.autoHesitate = function()
+		{
+			this.ball.stop();
+
+			if (this.doorsOpen)
+			{
+				var delay = .1 + Math.random()*2;
+				TweenLite.delayedCall(delay, this.fireBall.bind(this));
+			}
+			else {
+				console.log('doors closed... waiting...');
+				TweenLite.delayedCall(.4, this.autoHesitate.bind(this));
+			}
+		}
+
+		p.fireBall = function()
+		{
+			var duration = 1;
+			if (this.auto) duration = .9 + Math.random()*.45;
+
+			this.ballTween = TweenLite.to(this.ball, duration, {x:this.ballX.endX, y:327, scaleX:.45, scaleY:.45, ease:Sine.easeOut, 
+				onUpdate:this.onBallUpdate.bind(this), onComplete:this.loseBall.bind(this)});
+
+			this.ball.play();
 		}
 
 		p.onBallUpdate = function()
 		{
-			if (this.ball.y <= 355 && this.doorsOpen) 
+			if (this.ball.y <= 347 && this.doorsOpen) 
 			{
 				this.ballTween.kill();
 				this.potBall();
 			}
 		}
 
+		p.loseBall = function()
+		{
+			container.addChildAt(this.ball, 1);
+			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this)});			
+		}
+
 		p.potBall = function()
 		{
-			stage.setChildIndex(this.holeMask, stage.getChildIndex(this.ball));			
-			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this)});
-			if (this.doorsOpen) this.horse.moveForward();
+			this.ball.stop();
+			container.addChildAt(this.ball, 13);
+			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this), ease:Expo.easeIn});
+			this.horse.moveForward();
 		}
 
 		p.openDoors = function()
 		{
 			this.doorsOpen = true;
-			TweenLite.to(this.leftDoor, .5, {x:this.doorProps.x - this.leftDoor.image.width*2, ease:Bounce.easeOut});
-			TweenLite.to(this.rightDoor, .5, {x:this.doorProps.x + this.rightDoor.image.width, ease:Bounce.easeOut});
+			TweenLite.to(this.leftDoor, .4, {x:this.doorProps.x - this.leftDoor.image.width*2, ease:Bounce.easeOut});
+			TweenLite.to(this.rightDoor, .4, {x:this.doorProps.x + this.rightDoor.image.width, ease:Bounce.easeOut});
 		}
 
 		p.closeDoors = function()
 		{
 			this.doorsOpen = false;
-			TweenLite.to(this.leftDoor, .5, {x:this.doorProps.x - this.leftDoor.image.width, ease:Bounce.easeOut});
-			TweenLite.to(this.rightDoor, .5, {x:this.doorProps.x, ease:Bounce.easeOut});
+			TweenLite.to(this.leftDoor, .4, {x:this.doorProps.x - this.leftDoor.image.width, ease:Bounce.easeOut});
+			TweenLite.to(this.rightDoor, .4, {x:this.doorProps.x, ease:Bounce.easeOut});
 		}
 	}
 
