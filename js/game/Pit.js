@@ -2,18 +2,23 @@
 
     var namespace = GAMEMAIN.namespace('GAMEMAIN.game');
 
+    var stageTools;
     var container;
     var horsesManager;
+	var lanesBase;
+
     var preload;
 
 
     if (namespace.Pit === undefined) 
 	{
-        namespace.Pit = function(aContainer, aHorsesManager, aPreload)
+        namespace.Pit = function(aContainer, aStageTools, aHorsesManager, aLanesBase, aPreload)
  		{	
 			container = aContainer;
+			stageTools = aStageTools;
 			preload = aPreload;
 			horsesManager = aHorsesManager;
+			lanesBase = aLanesBase;
         }
 
         var p = namespace.Pit.prototype;
@@ -41,6 +46,7 @@
 
 			var spriteSheet = new createjs.SpriteSheet(json);
  			this.ball = new createjs.BitmapAnimation(spriteSheet);
+ 			this.ball.name = 'ball'+this.id;
  			this.ball.gotoAndStop(1);
 
 			this.ball.regX = 22;
@@ -53,12 +59,14 @@
 		p.createDoors = function()
 		{
 			this.leftDoor = new createjs.Bitmap(preload.getAsset('pitDoor'));
+			this.leftDoor.name = 'leftDoor'+this.id;
 			this.leftDoor.skewX = this.doorProps.skew;
 			this.leftDoor.x = this.doorProps.x - this.leftDoor.image.width;
 			this.leftDoor.y = 340 - this.leftDoor.image.height/2;
 			container.addChildAt(this.leftDoor, 2);
 
 			this.rightDoor = this.leftDoor.clone();
+			this.rightDoor.name = 'rightDoor'+this.id;
 			this.rightDoor.skewX = this.doorProps.skew;
 			this.rightDoor.x = this.doorProps.x;
 			this.rightDoor.y = 340 - this.rightDoor.image.height/2;
@@ -121,7 +129,7 @@
 
 		p.onBallUpdate = function()
 		{
-			if (this.ball.y <= 347 && this.doorsOpen) 
+			if (this.ball.y <= 347 && this.ball.y > 342 && this.doorsOpen) 
 			{
 				this.ballTween.kill();
 				this.potBall();
@@ -131,13 +139,20 @@
 		p.loseBall = function()
 		{
 			container.addChildAt(this.ball, 1);
-			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this)});			
+
+			console.log('LOSE ball', this.id);
+			stageTools.logDisplayList(container);
+
+			TweenLite.to(this.ball, .23, {y:400, onComplete:this.startBall.bind(this), ease:Expo.easeIn});			
 		}
 
 		p.potBall = function()
 		{
 			this.ball.stop();
-			container.addChildAt(this.ball, 13);
+
+			container.removeChild(this.ball);
+			container.addChildAt(this.ball, container.getChildIndex(lanesBase));
+
 			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this), ease:Expo.easeIn});
 			this.horse.moveForward();
 		}

@@ -3,6 +3,7 @@ GAMEMAIN.init = function()
 	console.log("game init");
 
 	var gameStage = new createjs.Stage(document.getElementById('gameStageCanvas'));
+	gameStage.name = 'mainStage';
 
 	createjs.Ticker.setFPS(60);
 	createjs.Ticker.useRAF = true;
@@ -18,12 +19,21 @@ GAMEMAIN.init = function()
 	function onPreloadComplete(event) 
     {
     	var bg = new createjs.Bitmap(preload.getAsset('bg'));
+    	bg.name = 'bg';
     	gameStage.addChild(bg);
 
-    	var horsesManager = new game.HorsesManager(gameStage);
+    	var stageTools = new game.StageTools();
+
+    	var horsesManager = new game.HorsesManager(gameStage, stageTools);
 		horsesManager.init(preload);
 
-		var pitsManager = new game.PitsManager(gameStage, horsesManager);
+		var post = new createjs.Bitmap(preload.getAsset('post'));
+    	post.name = 'post';
+    	post.x = 715;
+    	post.y = 70;
+    	gameStage.addChild(post);
+
+		var pitsManager = new game.PitsManager(gameStage, stageTools, horsesManager);
 		pitsManager.init(preload);
     }
 

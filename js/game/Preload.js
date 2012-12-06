@@ -21,6 +21,7 @@
 			manifest = [
 
 				{src:'img/bg.jpg', id:'bg'},
+				{src:'img/post.png', id:'post'},
 
 				{src:'img/horse1.png', id:'horse1'},
 				{src:'img/horse2.png', id:'horse2'},

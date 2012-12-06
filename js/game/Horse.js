@@ -2,6 +2,7 @@
 
     var namespace = GAMEMAIN.namespace('GAMEMAIN.game');
 
+    var stageTools;
     var container;
     var horse;
     var moveDuration;
@@ -12,8 +13,9 @@
 
     if (namespace.Horse === undefined) 
 	{
-        namespace.Horse = function(aContainer, aPreload)
+        namespace.Horse = function(aContainer, aPreload, aStageTools)
  		{	
+ 			stageTools = aStageTools;
 			container = aContainer;
 			preload = aPreload;
 			moveDuration = 2;
@@ -26,6 +28,7 @@
 		p.init = function(id)
 		{
 			this.horse = new createjs.Bitmap(preload.getAsset('horse'+id));
+			this.horse.name = 'horse'+id;
 			this.horse.regX = 50;
 			this.horse.regY = 82;
 			this.horse.x = 60;
@@ -34,6 +37,7 @@
 			container.addChild(this.horse);
 
 			var grass = new createjs.Bitmap(preload.getAsset('grass'+id));
+			grass.name = 'grass'+id;
 			grass.y = this.horse.y - 21;
 			container.addChild(grass);
 		}
