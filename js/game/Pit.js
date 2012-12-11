@@ -31,9 +31,10 @@
 			this.ballX = ballXPos;
 			this.doorProps = doorProps;
 			this.auto = auto;
+			this.active = false;
 
 			this.createBall();
-			this.createDoors();			
+			this.createDoors();		
 		}
 
 		p.createBall = function()
@@ -77,22 +78,37 @@
 
 		p.startBall = function()
 		{
-			container.addChild(this.ball);
-			this.ball.gotoAndPlay(Math.floor(1+Math.random()*this.ball.getNumFrames-1));
-			this.ball.x = this.ballX.startX;
-			this.ball.y = 550;
-			this.ball.buttonMode = true;
-			this.ball.scaleX = this.ball.scaleY = 1.3;
+			if (this.active)
+			{
+				container.addChild(this.ball);
+				this.ball.gotoAndPlay(Math.floor(1+Math.random()*this.ball.getNumFrames-1));
+				this.ball.x = this.ballX.startX;
+				this.ball.y = 550;
+				this.ball.buttonMode = true;
+				this.ball.scaleX = this.ball.scaleY = 1.3;
 
-			var props = {y:472, scaleX:1, scaleY:1, ease:Quad.easeOut};
-			this.auto ? props.onComplete = this.autoHesitate.bind(this) : props.onComplete = this.addPressListenerToBall.bind(this);
-			TweenLite.to(this.ball, .4, props);
+				var props = {y:472, scaleX:1, scaleY:1, ease:Quad.easeOut};
+				this.auto ? props.onComplete = this.autoHesitate.bind(this) : props.onComplete = this.addPressListenerToBall.bind(this);
+				TweenLite.to(this.ball, .4, props);
+			}			
 		}
 
 		p.addPressListenerToBall = function()
 		{
 			this.ball.stop();
 			this.ball.onPress = this.onPressBall.bind(this);
+
+			this.keyChecker = this.checkForSpace.bind(this);
+			createjs.Ticker.addListener(this.keyChecker);
+		}
+
+		p.checkForSpace = function()
+		{
+			if (keydown.space) 
+			{
+				this.ball.onPress = null;
+				this.fireBall();
+			}
 		}
 
 		p.onPressBall = function(evt)
@@ -110,14 +126,13 @@
 				var delay = .1 + Math.random()*2;
 				TweenLite.delayedCall(delay, this.fireBall.bind(this));
 			}
-			else {
-				console.log('doors closed... waiting...');
-				TweenLite.delayedCall(.4, this.autoHesitate.bind(this));
-			}
+			else TweenLite.delayedCall(.4, this.autoHesitate.bind(this));
 		}
 
 		p.fireBall = function()
 		{
+			createjs.Ticker.removeListener(this.keyChecker);
+
 			var duration = 1;
 			if (this.auto) duration = .9 + Math.random()*.45;
 
@@ -139,10 +154,6 @@
 		p.loseBall = function()
 		{
 			container.addChildAt(this.ball, 1);
-
-			console.log('LOSE ball', this.id);
-			stageTools.logDisplayList(container);
-
 			TweenLite.to(this.ball, .23, {y:400, onComplete:this.startBall.bind(this), ease:Expo.easeIn});			
 		}
 
@@ -154,7 +165,7 @@
 			container.addChildAt(this.ball, container.getChildIndex(lanesBase));
 
 			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this), ease:Expo.easeIn});
-			this.horse.moveForward();
+			this.horse.moveForward(this.horseDistance);
 		}
 
 		p.openDoors = function()
@@ -169,6 +180,16 @@
 			this.doorsOpen = false;
 			TweenLite.to(this.leftDoor, .4, {x:this.doorProps.x - this.leftDoor.image.width, ease:Bounce.easeOut});
 			TweenLite.to(this.rightDoor, .4, {x:this.doorProps.x, ease:Bounce.easeOut});
+		}
+
+		p.reset = function()
+		{
+			this.active = false;
+			TweenLite.killTweensOf(this.horse);
+			TweenLite.killTweensOf(this.ball);
+
+			this.ball.y = 550;
+			this.closeDoors();
 		}
 	}
 

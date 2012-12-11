@@ -19,7 +19,6 @@
 			stage = aStage;
 			stageTools = aStageTools;
 			horsesManager = aHorsesManager;
-			difficulty = 'hard';
         }
 
         var p = namespace.PitsManager.prototype;
@@ -55,7 +54,6 @@
 			pitsContainer.addChildAt(holes, 1);
 			
 			this.initPits();
-			this.startDoorsSequence();
 		}
 
 		p.initPits = function()
@@ -68,7 +66,7 @@
 			this.createPit(4, {startX:693, endX:530}, {x:542, skew:-32}, true);
 			this.createPit(5, {startX:880, endX:665}, {x:683, skew:-42}, true);
 
-			stageTools.logDisplayList(pitsContainer);
+			// stageTools.logDisplayList(pitsContainer);
 		}
 
 		p.createPit = function(id, ballXPos, doorProps, auto)
@@ -78,48 +76,68 @@
 			this.pits.push(pit);
 		}
 
-		p.startDoorsSequence = function()
+		p.startDoorsSequence = function(level)
 		{
+			difficulty = level;
+			this.doDoorsSequence = true;
+
 			for (var i=0; i<this.pits.length; ++i) 
 			{
+				if (difficulty == 'easy') this.pits[i].horseDistance = 78;
+				else if (difficulty == 'medium') this.pits[i].horseDistance = 39;
+				else this.pits[i].horseDistance = 26;
+
+				this.pits[i].active = true;
 				this.pits[i].startBall();
 			}
 
-			this.doorsSequence = [1, 2, 1, .5, 2, 1];
+			if (difficulty == 'easy') this.doorsSequence = [2, .5];
+			else if (difficulty == 'medium') this.doorsSequence = [2, 1, 1];
+			else this.doorsSequence = false;
+
 			this.doorsPointer = -1;
 			this.doNextStep();
 		}
 
 		p.doNextStep = function()
 		{
-			if (++this.doorsPointer >= this.doorsSequence.length) this.doorsPointer = 0;
+			if (this.doorsSequence)
+			{
+				if (++this.doorsPointer >= this.doorsSequence.length) this.doorsPointer = 0;
+
+				for (var i=0; i<this.pits.length; ++i) 
+				{
+					this.pits[i].doorsOpen ? this.pits[i].closeDoors() : this.pits[i].openDoors();
+				}
+
+				var delay = this.doorsSequence[this.doorsPointer];;
+
+				this.doNextStepBound = this.doNextStep.bind(this);
+				if (this.doDoorsSequence) TweenLite.delayedCall(delay, this.doNextStepBound);
+
+				// console.log('doors step: ' + this.doorsPointer + ', delay: ' + delay + ' secs');
+			}
+			else {
+				for (var i=0; i<this.pits.length; ++i) 
+				{
+					this.pits[i].doorsOpen ? this.pits[i].closeDoors() : this.pits[i].openDoors();
+				}
+
+				this.doNextStepBound = this.doNextStep.bind(this);
+				if (this.doDoorsSequence) TweenLite.delayedCall(.4 + Math.random()*4, this.doNextStepBound);
+			}
+			
+		}
+
+		p.reset = function()
+		{
+			this.doDoorsSequence = false;
+			TweenLite.killDelayedCallsTo(this.doNextStepBound);
 
 			for (var i=0; i<this.pits.length; ++i) 
 			{
-				this.pits[i].doorsOpen ? this.pits[i].closeDoors() : this.pits[i].openDoors();
+				this.pits[i].reset();
 			}
-
-			var delayMultiplier; 
-
-			switch (difficulty) 
-			{
-				case 'easy':
-					delayMultiplier = 1;
-					break;
-
-				case 'medium':
-					delayMultiplier = .5;
-					break;
-
-				case 'hard':
-					delayMultiplier = .25;
-					break;
-			}
-
-			var delay = this.doorsSequence[this.doorsPointer] * delayMultiplier;
-			TweenLite.delayedCall(delay, this.doNextStep.bind(this));
-
-			// console.log('doors step: ' + this.doorsPointer + ', delay: ' + delay + ' secs');
 		}
 }
 

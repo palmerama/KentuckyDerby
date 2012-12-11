@@ -4,13 +4,14 @@
 
     var manifest;
     var preload;
+    var stage;
 
 
     if (namespace.Preload === undefined) 
 	{
-        namespace.Preload = function()
+        namespace.Preload = function(aStage)
  		{	
-			
+			stage = aStage;
         }
 
         var p = namespace.Preload.prototype;
@@ -18,6 +19,9 @@
 		
 		p.init = function(onLoadComplete)
 		{
+			this.onLoadComplete = onLoadComplete;
+			this.showPreloader();
+
 			manifest = [
 
 				{src:'img/bg.jpg', id:'bg'},
@@ -47,8 +51,64 @@
 			];
 
 			preload = new createjs.PreloadJS();
-		    preload.onComplete = onLoadComplete;
+		    preload.onComplete = this.loadComplete.bind(this);
+		    preload.onProgress = this.onProgress.bind(this);
 		    preload.loadManifest(manifest);
+		}
+
+		p.showPreloader = function()
+		{
+			this.container = new createjs.Container();
+			this.container.x = 400;
+			this.container.y = 240;
+			stage.addChild(this.container);
+
+			var loading = new createjs.Bitmap('img/ui/loading.jpg');
+			loading.x = -99;
+			loading.y = -45;
+			loading.alpha = 0;
+			TweenLite.to(loading, .8, {alpha:1, ease:Sine.easeIn});
+			this.container.addChild(loading);
+
+			var bgBar = new createjs.Shape();
+			var g = bgBar.graphics;
+			g.beginFill('#491111');
+			g.rect(-217, 10, 434, 12);
+			g.endFill();
+			this.container.addChild(bgBar);
+
+			var brownBar = new createjs.Bitmap('img/ui/loadingbar.jpg');
+			brownBar.x = -217;
+			brownBar.y = 10;
+			this.container.addChild(brownBar);
+
+			this.bar = new createjs.Shape();
+			g = this.bar.graphics;
+			g.beginFill('#FFFF00');
+			g.rect(-217, 10, 2, 12);
+			g.endFill();
+
+			brownBar.mask = this.bar;
+			this.barWidth = 2;
+		}
+
+		p.onProgress = function(event)
+		{
+			TweenLite.to(this, .3, {barWidth:2 + (432*event.loaded), ease:Sine.easeOut, onUpdate:this.setBarWidth.bind(this)});
+		}
+
+		p.setBarWidth = function()
+		{
+			var g = this.bar.graphics;
+			g.beginFill('#FFFF00');
+			g.rect(-217, 10, this.barWidth, 12);
+			g.endFill();
+		}
+
+		p.loadComplete = function()
+		{
+			stage.removeChild(this.container);
+			this.onLoadComplete();
 		}
 
 		p.getAsset = function(asset)

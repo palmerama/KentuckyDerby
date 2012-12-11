@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>The Jockey Club – Kentucky Derby Game</title>
+
+		<link rel="stylesheet" href="css/gamestyle.css" type="text/css" media="all" />
+
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+
+		<script type="text/javascript">
+
+			var now = new Date();
+			console.log(now);
+
+			var name = 'jamie';
+			var score = 73558262;
+
+			var request = $.ajax({
+			  url: "save_score.php",
+			  type: "GET",
+			  data: {name:name, score:score},
+			  dataType: "html"
+			});
+
+			request.done(function(msg) {
+			  console.log(msg);
+			});
+
+			request.fail(function(jqXHR, textStatus) {
+			  alert( "Request failed: " + textStatus );
+			});
+
+		</script>
+
+
+	</head>
+
+	<body>
+		
+	</body>
+
+</html>

@@ -5,44 +5,20 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title>The Jockey Club – Kentucky Derby Game</title>
 
+		<script type="text/javascript" src="http://fast.fonts.com/jsapi/57a65de9-f08d-4b19-9963-42a134f34c80.js"></script>
 		<link rel="stylesheet" href="css/gamestyle.css" type="text/css" media="all" />
 
 		<script type="text/javascript" src="js/misc/Function.prototype.bind.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="js/misc/jquery.hotkeys.js"></script>
+		<script type="text/javascript" src="js/misc/keyBinding.js"></script>
 
 		<script type="text/javascript" src="js/createjs/min/easeljs-0.5.0.min.js"></script>
 		<script type="text/javascript" src="js/createjs/min/preloadjs-0.2.0.min.js"></script>
-<!--
-		<script type="text/javascript" src="js/createjs/easeljs/utils/UID.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/utils/Ticker.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/events/MouseEvent.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/geom/Matrix2D.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/geom/Point.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/geom/Rectangle.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Shadow.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/SpriteSheet.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Graphics.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/DisplayObject.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Container.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Stage.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Bitmap.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/BitmapAnimation.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Shape.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/Text.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/utils/SpriteSheetUtils.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/utils/SpriteSheetBuilder.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/display/DOMElement.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/filters/Filter.js"></script>
-		<script type="text/javascript" src="js/createjs/easeljs/filters/AlphaMaskFilter.js"></script>	
-		
-		<script type="text/javascript" src="js/createjs/easeljs/filters/BoxBlurFilter.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/filters/ColorFilter.js"></script>	
-		<script type="text/javascript" src="js/createjs/easeljs/filters/ColorMatrixFilter.js"></script>	
-
-		<script type="text/javascript" src="js/createjs/easeljs/ui/Touch.js"></script>
--->
 
 		<script type="text/javascript" src="js/greensock/easing/EasePack.min.js"></script>
 		<script type="text/javascript" src="js/greensock/TweenLite.min.js"></script>
+		<script type="text/javascript" src="js/greensock/plugins/CSSPlugin.min.js"></script>
 
 		<script type="text/javascript" src="js/game/GameMain.js"></script>
 		<script type="text/javascript" src="js/game/HorsesManager.js"></script>
@@ -51,13 +27,45 @@
 		<script type="text/javascript" src="js/game/Pit.js"></script>
 		<script type="text/javascript" src="js/game/Preload.js"></script>
 		<script type="text/javascript" src="js/game/StageTools.js"></script>
+		<script type="text/javascript" src="js/game/HighScoresManager.js"></script>
+		<script type="text/javascript" src="js/game/GameManager.js"></script>
 		<script type="text/javascript" src="js/game/GameInit.js"></script>
-
 
 	</head>
 
 	<body>
-		<canvas id='gameStageCanvas' width='800' height='480' />
+		<div id='game'>
+			<canvas id='gameStageCanvas' width='800' height='480'></canvas>
+			<div id='ui'>
+
+				<div id='intro'>
+					<div id='buttonsHarness'>
+						<div id='easyButton'></div>
+						<div id='mediumButton'></div>
+						<div id='hardButton'></div>
+					</div>
+				</div>
+
+				<div id='winner'>
+					<div id='yourHorseTime'>1:43:123</div>
+					<input id='nicknameField' name='nickname' type='text' value='' maxlength='3'>
+					<div id='submitButton'></div>
+					<div id='raceAgainWinnerButton' class='raceAgainButton'></div>
+				</div>
+
+				<div id='loser'>
+					<div id='raceAgainLoserButton' class='raceAgainButton'></div>
+				</div>
+
+				<div id='highscores'>
+					<table id='highscorestable'>
+						<tr><td id='hs1a'>1.</td><td id='hs1b'>BMR</td><td id='hs1c'>01:23:123</td></tr>
+					</table>
+					<div id='raceAgainHighScoresButton' class='raceAgainButton'></div>
+				</div>
+
+			</div>
+		</div>
 	</body>
 
 </html>
