@@ -136,7 +136,7 @@
 			var duration = 1;
 			if (this.auto) duration = .9 + Math.random()*.45;
 
-			this.ballTween = TweenLite.to(this.ball, duration, {x:this.ballX.endX, y:327, scaleX:.45, scaleY:.45, ease:Sine.easeOut, 
+			this.ballTween = TweenMax.to(this.ball, duration, {x:this.ballX.endX, y:327, scaleX:.45, scaleY:.45, ease:Sine.easeOut, 
 				onUpdate:this.onBallUpdate.bind(this), onComplete:this.loseBall.bind(this)});
 
 			this.ball.play();
@@ -144,8 +144,10 @@
 
 		p.onBallUpdate = function()
 		{
-			if (this.ball.y <= 347 && this.ball.y > 342 && this.doorsOpen) 
+			// if (this.ball.y <= 347 && this.ball.y > 335 && this.doorsOpen) 
+			if (this.ballTween.progress() <= .75 && this.ballTween.progress() > .7 && this.doorsOpen) 
 			{
+				if (!this.auto) console.log('potted at:', this.ballTween.progress());
 				this.ballTween.kill();
 				this.potBall();
 			}
@@ -166,6 +168,11 @@
 
 			TweenLite.to(this.ball, .3, {y:400, onComplete:this.startBall.bind(this), ease:Expo.easeIn});
 			this.horse.moveForward(this.horseDistance);
+		}
+
+		p.setHorseDistance = function(you, auto)
+		{
+			this.auto ? this.horseDistance = auto : this.horseDistance = you;
 		}
 
 		p.openDoors = function()

@@ -54,7 +54,19 @@
 			}).bind(this));
 
 			$('#raceAgainHighScoresButton').click((function() {
-				this.restartGame();
+				if (this.level == 'hard') this.restartGame();
+				else this.showStepUp();
+			}).bind(this));
+
+			$('#raceAgainStepUpButton').click((function() {
+				horsesManager.reset();
+				this.hideStepUp();
+			}).bind(this));
+
+			$('#stepUpStepUpButton').click((function() {
+				horsesManager.reset();
+				this.level == 'easy' ? this.level = 'medium' : this.level = 'hard';
+				this.hideStepUp();
 			}).bind(this));
 	    }
 
@@ -91,6 +103,7 @@
 
 	    p.hideIntro = function(level)
 	    {
+	    	this.level = level;
 	    	horsesManager.getReady();
 
 	    	TweenLite.to(intro, .35, {css:{top:'480px'}, ease:Sine.easeIn});
@@ -105,6 +118,27 @@
 	    				}
 	    				).bind(this), [level]);
 	    			TweenLite.to(intro, 0, {css:{display:'none'}});
+	    		}
+	    		).bind(this), onCompleteParams:[level]});
+	    }
+
+	    p.hideStepUp = function()
+	    {
+	    	var level = this.level;
+	    	horsesManager.getReady();
+
+	    	TweenLite.to(stepup, .35, {css:{top:'480px'}, ease:Sine.easeIn});
+	    	TweenLite.to(ui, .16, {delay:.35, css:{display:'none', alpha:'0'}, ease:Sine.easeIn, onComplete:(function(level)
+	    		{
+	    			TweenLite.delayedCall(1.5, (function(level)
+	    				{
+	    					this.startTime = new Date();
+	    					pitsManager.startDoorsSequence(level);
+	    					this.tickListener = this.checkForWinner.bind(this);
+	    					createjs.Ticker.addListener(this.tickListener);
+	    				}
+	    				).bind(this), [level]);
+	    			TweenLite.to(stepup, 0, {css:{display:'none'}});
 	    		}
 	    		).bind(this), onCompleteParams:[level]});
 	    }
@@ -127,6 +161,7 @@
 	    	TweenLite.to(winner, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(loser, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(highscores, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(stepup, 0, {css:{display:'none', top:'480px'}});
 
 	    	TweenLite.to(intro, .35, {css:{top:'0px', display:'block'}, ease:Sine.easeOut});
 	    }
@@ -141,10 +176,11 @@
 	    	TweenLite.to(loser, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(highscores, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(intro, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(stepup, 0, {css:{display:'none', top:'480px'}});
 
 	    	TweenLite.to(winner, .35, {css:{top:'0px', display:'block'}, ease:Sine.easeOut, onComplete:(function()
 	    			{
-	    				highscoresManager.initScoreEntry(this.playTimeMS, this.yourTime);
+	    				highscoresManager.initScoreEntry(this.playTimeMS, this.yourTime, this.level);
 	    			}
 	    		).bind(this)});
 	    }
@@ -155,6 +191,7 @@
 	    	TweenLite.to(winner, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(highscores, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(intro, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(stepup, 0, {css:{display:'none', top:'480px'}});
 
 	    	TweenLite.to(loser, .35, {css:{top:'0px', display:'block'}, ease:Sine.easeOut});
 	    }
@@ -165,8 +202,20 @@
 	    	TweenLite.to(winner, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(loser, 0, {css:{display:'none', top:'480px'}});
 	    	TweenLite.to(intro, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(stepup, 0, {css:{display:'none', top:'480px'}});
 
 	    	TweenLite.to(highscores, .35, {css:{top:'0px', display:'block'}, ease:Sine.easeOut});
+	    }
+
+	    p.showStepUp = function()
+	    {
+	    	TweenLite.to(ui, 0, {css:{display:'table-cell', alpha:1}});
+	    	TweenLite.to(winner, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(loser, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(intro, 0, {css:{display:'none', top:'480px'}});
+	    	TweenLite.to(highscores, 0, {css:{display:'none', top:'480px'}});
+
+	    	TweenLite.to(stepup, .35, {css:{top:'0px', display:'block'}, ease:Sine.easeOut});
 	    }
 
 	    p.getPlayTime = function()
@@ -178,11 +227,14 @@
 		    	var date = new Date(this.playTimeMS);
 		    	var m = date.getMinutes() + '';
 		    	var s = date.getSeconds() + '';
+		    	var ms = date.getMilliseconds() + '';
 
 		    	if (m.length < 2) m = '0' + m;
 		    	if (s.length < 2) s = '0' + s;
+		    	if (ms.length == 1) ms = '00' + ms;
+		    	if (ms.length == 2) ms = '0' + ms;
 
-		    	return m + ':' + s + ':' + date.getMilliseconds();
+		    	return m + ':' + s + ':' + ms;
 		    }
 		    else return '01:02:123';
 	    }

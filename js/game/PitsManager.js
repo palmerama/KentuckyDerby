@@ -60,11 +60,11 @@
 		{
 			this.pits = [];
 
-			this.createPit(1, {startX:-80, endX:140}, {x:120, skew:42}, true);
+			this.createPit(1, {startX:-80, endX:133}, {x:120, skew:42}, true);
 			this.createPit(2, {startX:130, endX:263}, {x:255, skew:32}, true);
 			this.createPit(3, {startX:400, endX:400}, {x:400, skew:0}, false);
 			this.createPit(4, {startX:693, endX:530}, {x:542, skew:-32}, true);
-			this.createPit(5, {startX:880, endX:665}, {x:683, skew:-42}, true);
+			this.createPit(5, {startX:880, endX:669}, {x:683, skew:-42}, true);
 
 			// stageTools.logDisplayList(pitsContainer);
 		}
@@ -83,9 +83,9 @@
 
 			for (var i=0; i<this.pits.length; ++i) 
 			{
-				if (difficulty == 'easy') this.pits[i].horseDistance = 78;
-				else if (difficulty == 'medium') this.pits[i].horseDistance = 39;
-				else this.pits[i].horseDistance = 26;
+				if (difficulty == 'easy') this.pits[i].setHorseDistance(78, 80);
+				else if (difficulty == 'medium') this.pits[i].setHorseDistance(39, 55);
+				else this.pits[i].setHorseDistance(26, 45);
 
 				this.pits[i].active = true;
 				this.pits[i].startBall();

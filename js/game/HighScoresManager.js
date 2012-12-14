@@ -19,17 +19,15 @@
 			this.rudeWords = ['TIT','BUM','ASS','GAY','COK','DIK','GIT','NOB','JIZ','MUF','PUF','SEX','DIC','RIM','POO','WEE','FKR','FUK','FUC','CNT'];
 		}
 
-		p.setRow = function(row, name, time)
+		p.initScoreEntry = function(score, time, level)
 		{
-			document.getElementById('hs' + row + 'a').innerHTML = row + '.';
-			document.getElementById('hs' + row + 'b').innerHTML = name;
-			document.getElementById('hs' + row + 'c').innerHTML = time;
-		}
+			this.savingScore = false;
 
-		p.initScoreEntry = function(score, time)
-		{
 			this.userScore = score;
 			this.userTime = time;
+			this.level = level;
+
+			document.getElementById('timesTitle').innerHTML = 'BEST \'' + this.level.toUpperCase() + '\' TIMES';
 
 			$('#submitButton').click((function() {
 					this.saveScore();
@@ -61,14 +59,19 @@
 		{
 			this.onNameChange(null);
 
-			if (this.nameField.value.length > 0)
+			console.log('name length:', this.nameField.value.length, 'this.savingScore:', this.savingScore);
+
+			if (this.nameField.value.length > 0 && this.savingScore == false)
 			{
-				var getHighScores = this.getHighScores;
+				console.log('saving score...');
+
+				this.savingScore = true;
+				var getHighScores = this.getHighScores.bind(this);
 
 				var request = $.ajax({
 				  url: "save_score.php",
 				  type: "GET",
-				  data: {name:this.nameField.value, score:this.userScore, time:this.userTime},
+				  data: {name:this.nameField.value, score:this.userScore, time:this.userTime, level:this.level},
 				  dataType: "html"
 				});
 
@@ -78,7 +81,7 @@
 				});
 
 				request.fail(function(jqXHR, textStatus) {
-					 alert( "Request failed: " + textStatus );
+					 console.log( "Request failed: " + textStatus );
 					 getHighScores();
 				});
 			}			
@@ -89,6 +92,7 @@
 			var request = $.ajax({
 			  url: "get_scores.php",
 			  type: "GET",
+			  data: {level:this.level},
 			  dataType: "html"
 			});
 
