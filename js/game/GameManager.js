@@ -31,6 +31,8 @@
 	    	this.showIntro();
 	    	this.initGame();
 
+	    	createjs.SoundJS.play('music', createjs.SoundJS.INTERRUPT_NONE, 0, 0, -1);
+
 			TweenLite.to(ui, .7, {css:{backgroundColor:'rgba(0, 0, 0, .8)'}, ease:Sine.easeIn});
 
 			$('#easyButton').click((function() {

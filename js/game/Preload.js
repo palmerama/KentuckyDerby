@@ -46,11 +46,14 @@
 
 				{src:'img/ball.png', id:'ball'},
 				{src:'img/snowball1.png', id:'snowball1'},
-				{src:'img/pitdoor.png', id:'pitDoor'}
+				{src:'img/pitdoor.png', id:'pitDoor'},
 
+				{src:'sound/airhorn.mp3|sound/airhorn.ogg', id:'airhorn'},
+				{src:'sound/music.mp3|sound/music.ogg', id:'music'}
 			];
 
 			preload = new createjs.PreloadJS();
+			preload.installPlugin(createjs.SoundJS);
 		    preload.onComplete = this.loadComplete.bind(this);
 		    preload.onProgress = this.onProgress.bind(this);
 		    preload.loadManifest(manifest);

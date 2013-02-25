@@ -32,6 +32,7 @@
 			this.doorProps = doorProps;
 			this.auto = auto;
 			this.active = false;
+			this.rolling = false;
 
 			this.createBall();
 			this.createDoors();		
@@ -95,6 +96,7 @@
 
 		p.addPressListenerToBall = function()
 		{
+			this.rolling = false;
 			this.ball.stop();
 			this.ball.onPress = this.onPressBall.bind(this);
 
@@ -104,7 +106,7 @@
 
 		p.checkForSpace = function()
 		{
-			if (keydown.space) 
+			if (keydown.space && this.rolling == false) 
 			{
 				this.ball.onPress = null;
 				this.fireBall();
@@ -120,6 +122,7 @@
 		p.autoHesitate = function()
 		{
 			this.ball.stop();
+			this.rolling = false;
 
 			if (this.doorsOpen)
 			{
@@ -132,22 +135,33 @@
 		p.fireBall = function()
 		{
 			createjs.Ticker.removeListener(this.keyChecker);
+			this.rolling = true;
 
 			var duration = 1;
 			if (this.auto) duration = .9 + Math.random()*.45;
 
-			this.ballTween = TweenMax.to(this.ball, duration, {x:this.ballX.endX, y:327, scaleX:.45, scaleY:.45, ease:Sine.easeOut, 
-				onUpdate:this.onBallUpdate.bind(this), onComplete:this.loseBall.bind(this)});
+			var props = {x:this.ballX.endX, y:327, scaleX:.45, scaleY:.45, ease:Sine.easeOut, 
+				onUpdate:this.onBallUpdate.bind(this), onComplete:this.loseBall.bind(this)};
 
+			// switch to frames at low fps and force framerate for tween (don't miss hole!)
+			if (createjs.Ticker.getMeasuredFPS() < 30) 
+			{
+				props.useFrames = true;
+				duration = 30;
+			} 
+			
+			this.ballTween = TweenMax.to(this.ball, duration, props);
 			this.ball.play();
 		}
 
 		p.onBallUpdate = function()
 		{
 			// if (this.ball.y <= 347 && this.ball.y > 335 && this.doorsOpen) 
+
 			if (this.ballTween.progress() <= .75 && this.ballTween.progress() > .7 && this.doorsOpen) 
 			{
-				if (!this.auto) console.log('potted at:', this.ballTween.progress());
+				if (!this.auto) console.log(createjs.Ticker.getMeasuredFPS() + 'fps, potted at:', this.ballTween.progress());
+
 				this.ballTween.kill();
 				this.potBall();
 			}

@@ -23,11 +23,14 @@
 		{
 			this.savingScore = false;
 
-			this.userScore = score;
+			this.userScore = jockeyScore = score;
 			this.userTime = time;
 			this.level = level;
 
-			document.getElementById('timesTitle').innerHTML = 'BEST \'' + this.level.toUpperCase() + '\' TIMES';
+			var levelName = 'MAIDEN';
+			if (this.level == 'medium') levelName = 'LISTED';
+			else if (this.level == 'hard') levelName = 'STAKES';
+			document.getElementById('timesTitle').innerHTML = 'BEST \'' + levelName + '\' TIMES';
 
 			$('#submitButton').click((function() {
 					this.saveScore();

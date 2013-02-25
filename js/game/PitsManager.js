@@ -78,6 +78,8 @@
 
 		p.startDoorsSequence = function(level)
 		{
+			createjs.SoundJS.play('airhorn');
+
 			difficulty = level;
 			this.doDoorsSequence = true;
 
